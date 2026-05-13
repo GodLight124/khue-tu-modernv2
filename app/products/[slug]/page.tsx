@@ -3,10 +3,16 @@ import { PortableText } from '@portabletext/react';
 
 export const revalidate = 0;
 
-export default async function ProductDetail({ params }: { params: { slug: string } }) {
+// SỬA Ở ĐÂY: Khai báo params là một Promise (Gói hàng)
+export default async function ProductDetail({ params }: { params: Promise<{ slug: string }> }) {
+  
+  // SỬA Ở ĐÂY: Dùng lệnh 'await' để mở gói hàng lấy đường link trước khi dùng
+  const resolvedParams = await params;
+
+  // Lấy dữ liệu sản phẩm từ Sanity dựa trên đường link đã giải nén
   const product = await client.fetch(`*[_type == "product" && slug.current == $slug][0]{
     name, price, tag, "imageUrl": image.asset->url, shortDescription, details
-  }`, { slug: params.slug });
+  }`, { slug: resolvedParams.slug });
 
   if (!product) return <div className="text-center py-20 font-bold text-2xl">Không tìm thấy sản phẩm!</div>;
 
