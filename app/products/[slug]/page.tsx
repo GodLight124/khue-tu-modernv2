@@ -1,47 +1,110 @@
+import React from 'react';
+import Link from 'next/link';
 import { client } from '@/sanity/lib/client';
-import { PortableText } from '@portabletext/react'; // Công cụ để đọc nội dung văn bản dài
 
 export const revalidate = 0;
 
-export default async function ProductDetail({ params }: { params: { slug: string } }) {
-  const product = await client.fetch(`*[_type == "product" && slug.current == $slug][0]{
-    name, price, tag, "imageUrl": image.asset->url, shortDescription, details
-  }`, { slug: params.slug });
+export default async function HomePage() {
+  // Lấy Tin tức
+  const posts = await client.fetch(`*[_type == "post"] | order(publishedAt desc)[0...4] {
+    _id, title, publishedAt, excerpt, "imageUrl": mainImage.asset->url
+  }`);
 
-  if (!product) return <div className="text-center py-20">Không tìm thấy sản phẩm!</div>;
+  // Lấy Sản phẩm thật từ Sanity
+  const products = await client.fetch(`*[_type == "product"] | order(_createdAt desc) {
+    _id, name, price, tag, "slug": slug.current, "imageUrl": image.asset->url
+  }`);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-6 py-12">
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Ảnh bên trái */}
-          <div className="rounded-3xl overflow-hidden bg-slate-50 border border-slate-100">
-            <img src={product.imageUrl} alt={product.name} className="w-full h-auto" />
+    <div className="min-h-screen bg-white text-slate-900">
+      {/* THANH ĐIỀU HƯỚNG */}
+      <nav className="border-b sticky top-0 bg-white/80 backdrop-blur-md z-50">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">MODERN PRINT</div>
+          <div className="hidden md:flex gap-8 font-medium text-slate-600">
+            <Link href="/" className="hover:text-blue-600 transition">Trang chủ</Link>
+            <Link href="#" className="hover:text-blue-600 transition">Máy in</Link>
+            <Link href="#" className="hover:text-blue-600 transition">Vật tư</Link>
           </div>
+          <button className="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700">Liên hệ</button>
+        </div>
+      </nav>
 
-          {/* Thông tin bên phải */}
+      {/* BANNER (HERO SECTION) */}
+      <section className="py-20 bg-slate-50">
+        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="text-blue-600 font-bold uppercase tracking-widest text-sm">{product.tag}</span>
-            <h1 className="text-4xl font-extrabold mt-4">{product.name}</h1>
-            <p className="text-3xl font-black text-blue-600 mt-6">{product.price}</p>
-            <div className="mt-8 p-6 bg-slate-50 rounded-2xl border-l-4 border-blue-600">
-               <p className="text-slate-600 italic">"{product.shortDescription}"</p>
-            </div>
-            <button className="w-full mt-10 bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all">
-              Đặt hàng ngay: 09xx.xxx.xxx
-            </button>
+            <h1 className="text-5xl font-extrabold mt-4 leading-tight">Nâng tầm <span className="text-blue-600">Công nghệ Mã vạch</span></h1>
+            <p className="mt-6 text-lg text-slate-600">Thiết bị chính hãng, giải pháp tối ưu cho kho bãi và bán lẻ.</p>
+          </div>
+          <div className="rounded-3xl h-[300px] overflow-hidden shadow-2xl">
+            <img src="https://images.unsplash.com/photo-1563315629-c88d89318f61?q=80&w=800" className="w-full h-full object-cover" alt="Hero" />
           </div>
         </div>
+      </section>
 
-        {/* Nội dung chi tiết dài bên dưới */}
-        <div className="mt-20 border-t pt-12">
-          <h2 className="text-2xl font-bold mb-8">Thông số kỹ thuật & Chi tiết</h2>
-          <div className="prose prose-blue max-w-none text-slate-700 leading-relaxed">
-            {/* Đây là nơi hiển thị toàn bộ bài viết bạn gõ trong Sanity */}
-            <PortableText value={product.details} />
+      {/* DANH SÁCH SẢN PHẨM TỪ SANITY */}
+      <section className="py-20 container mx-auto px-6">
+        <h2 className="text-3xl font-bold mb-12">Sản phẩm nổi bật</h2>
+        {products.length === 0 ? (
+          <div className="text-center text-slate-500 py-10 bg-slate-50 rounded-2xl border border-dashed">
+            Chưa có sản phẩm nào. Hãy vào /studio để đăng nhé!
           </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map((p: any) => (
+              <div key={p._id} className="group border border-slate-100 p-5 rounded-2xl hover:shadow-2xl transition-all flex flex-col">
+                <div className="bg-slate-50 rounded-xl h-48 mb-4 overflow-hidden">
+                  <img src={p.imageUrl || "https://images.unsplash.com/photo-1588508065123-287b28e013da?q=80&w=400"} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                </div>
+                <span className="self-start text-[10px] font-bold uppercase text-blue-500 bg-blue-50 px-2 py-1 rounded">{p.tag}</span>
+                <h3 className="font-bold text-lg mt-3 group-hover:text-blue-600 flex-grow">{p.name}</h3>
+                <p className="text-blue-600 font-black text-xl mt-2">{p.price}</p>
+                <Link href={`/products/${p.slug}`} className="block text-center w-full mt-5 bg-slate-100 text-slate-900 py-3 rounded-lg font-bold group-hover:bg-blue-600 group-hover:text-white transition-all">
+                  Xem chi tiết
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* DANH SÁCH TIN TỨC TỪ SANITY */}
+      <section className="py-20 bg-white border-t border-slate-100">
+        <div className="container mx-auto px-6">
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <h2 className="text-3xl font-bold">Kiến thức In ấn</h2>
+              <p className="text-slate-500 mt-2">Cập nhật công nghệ và hướng dẫn kỹ thuật mới nhất</p>
+            </div>
+          </div>
+          
+          {posts.length === 0 ? (
+            <div className="text-center text-slate-500 py-10 bg-slate-50 rounded-2xl border border-dashed">
+              Chưa có bài viết nào. Hãy vào /studio để đăng bài nhé!
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {posts.map((post: any) => (
+                <div key={post._id} className="flex flex-col md:flex-row gap-6 group cursor-pointer border border-slate-100 p-4 rounded-2xl hover:shadow-xl transition-all">
+                  <div className="md:w-1/3 h-40 rounded-xl overflow-hidden shrink-0 bg-slate-100">
+                    <img src={post.imageUrl || "https://images.unsplash.com/photo-1588508065123-287b28e013da?q=80&w=400"} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <p className="text-sm text-slate-400 mb-2">
+                      {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('vi-VN') : 'Mới cập nhật'}
+                    </p>
+                    <h3 className="font-bold text-xl mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      {post.title}
+                    </h3>
+                    <p className="text-slate-600 line-clamp-2">{post.excerpt}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
