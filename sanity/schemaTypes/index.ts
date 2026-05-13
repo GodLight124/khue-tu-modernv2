@@ -2,33 +2,30 @@ import { type SchemaTypeDefinition } from 'sanity'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
-    // 1. KHUÔN MẪU CÀI ĐẶT TRANG CHỦ (BANNER)
+    // 1. KHUÔN MẪU CÀI ĐẶT TRANG CHỦ (Đã nâng cấp thành nhiều Banner)
     {
       name: 'homeSettings',
       title: 'Cài đặt Trang chủ',
       type: 'document',
       fields: [
-        { 
-          name: 'heroTitle', 
-          title: 'Tiêu đề Banner', 
-          type: 'string',
-          description: 'Ví dụ: Nâng tầm Công nghệ Mã vạch'
-        },
-        { 
-          name: 'heroSubtitle', 
-          title: 'Mô tả ngắn gọn', 
-          type: 'text',
-          description: 'Dòng chữ nhỏ dưới tiêu đề'
-        },
-        { 
-          name: 'heroImage', 
-          title: 'Ảnh Banner Hero', 
-          type: 'image', 
-          options: { hotspot: true } 
+        {
+          name: 'slides',
+          title: 'Danh sách Slide Banner',
+          type: 'array',
+          of: [
+            {
+              type: 'object',
+              fields: [
+                { name: 'heroTitle', title: 'Tiêu đề Banner', type: 'string' },
+                { name: 'heroSubtitle', title: 'Mô tả ngắn gọn', type: 'text' },
+                { name: 'heroImage', title: 'Ảnh Banner', type: 'image', options: { hotspot: true } },
+              ],
+            },
+          ],
         },
       ],
     },
-    // 2. GIỮ NGUYÊN KHUÔN SẢN PHẨM
+    // 2. KHUÔN SẢN PHẨM (Giữ nguyên)
     {
       name: 'product',
       title: 'Sản Phẩm',
@@ -43,7 +40,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
         { name: 'details', title: 'Chi tiết', type: 'array', of: [{ type: 'block' }] },
       ],
     },
-    // 3. GIỮ NGUYÊN KHUÔN TIN TỨC
+    // 3. KHUÔN TIN TỨC (Giữ nguyên)
     {
       name: 'post',
       title: 'Bài Viết (Tin Tức)',
