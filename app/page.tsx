@@ -34,7 +34,7 @@ export default async function HomePage() {
           <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">MODERN PRINT</div>
           <div className="hidden md:flex gap-8 font-medium text-slate-600">
             <Link href="/" className="hover:text-blue-600 transition">Trang chủ</Link>
-            <Link href="#" className="hover:text-blue-600 transition">Máy in</Link>
+            <Link href="/products" className="hover:text-blue-600 transition">Máy in</Link>
             <Link href="#" className="hover:text-blue-600 transition">Vật tư</Link>
           </div>
           <button className="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700">Liên hệ</button>
